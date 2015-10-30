@@ -146,7 +146,7 @@ endif (valves)
 add_definitions(-fPIC)
 add_library(HandCommander src/hand_commander.cpp)
 add_dependencies(HandCommander ${catkin_EXPORTED_TARGETS})
-target_link_libraries(HandCommander ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(HandCommander sr_hand_finder ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 

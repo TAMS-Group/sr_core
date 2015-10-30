@@ -28,11 +28,13 @@
  */
 
 #include <sr_hand/hand_commander.hpp>
+#include <sr_utilities/sr_hand_finder.hpp>
 #include <controller_manager_msgs/ListControllers.h>
 #include <sr_robot_msgs/sendupdate.h>
 #include <std_msgs/Float64.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 #include <utility>
 #include <map>
 #include <string>
@@ -134,7 +136,6 @@ namespace shadowrobot
       }
       for (size_t i = 0; i < joint_vector.size(); ++i)
       {
-        boost::algorithm::to_upper(joint_vector.at(i).joint_name);
         std_msgs::Float64 target;
         target.data = joint_vector.at(i).joint_target * M_PI / 180.0;
         sr_hand_target_pub_map[joint_vector.at(i).joint_name].publish(target);
@@ -173,8 +174,6 @@ namespace shadowrobot
     {
       std::string jn = joint_names[i];
 
-      // urdf names are upper case
-      boost::algorithm::to_upper(jn);
       std::map<std::string, boost::shared_ptr<urdf::Joint> >::iterator it = all_joints.find(jn);
 
       if (it != all_joints.end())
@@ -194,16 +193,24 @@ namespace shadowrobot
   std::vector<std::string> HandCommander::get_all_joints()
   {
     std::vector<std::string> all_joints_names;
-    std::map<std::string, std::string>::iterator it;
+    std::pair<std::string, std::string> joint_sub_topic;
+    const std::vector<std::string> default_hand_joints = shadow_robot::SrHandFinder::get_default_joints();
 
-    for (it = sr_hand_sub_topics.begin(); it != sr_hand_sub_topics.end(); ++it)
+    BOOST_FOREACH(joint_sub_topic, sr_hand_sub_topics)
     {
-      // all Hand joint names have a length of 4...
-      // The other way would be to check if the name is in a list
-      // of possible names. Not sure what's best.
-      if (it->first.size() == 4)
+      std::string original_joint_name = joint_sub_topic.first;
+      std::string joint_name = joint_sub_topic.first;
+      if (boost::algorithm::ends_with(joint_name, "0"))
       {
-        all_joints_names.push_back(it->first);
+        joint_name[joint_name.size() - 1] = '1';
+      }
+      BOOST_FOREACH(std::string default_joint_name, default_hand_joints)
+      {
+        if (boost::algorithm::ends_with(joint_name, default_joint_name))
+        {
+          all_joints_names.push_back(original_joint_name);
+          break;
+        }
       }
     }
 
@@ -216,8 +223,6 @@ namespace shadowrobot
 
     if (hand_type == shadowhandRosLib::ETHERCAT)
     {
-      // urdf names are upper case
-      boost::algorithm::to_upper(joint_name);
       std::map<std::string, std::string>::iterator it = sr_hand_sub_topics.find(joint_name);
       if (it != sr_hand_sub_topics.end())
       {
