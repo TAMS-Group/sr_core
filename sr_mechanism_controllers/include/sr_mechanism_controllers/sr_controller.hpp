@@ -30,11 +30,12 @@
 #include <ros/node_handle.h>
 
 #include <controller_interface/controller.h>
-#include <ros_ethercat_model/robot_state.hpp>
+//#include <ros_ethercat_model/robot_state.hpp>
 #include <control_toolbox/pid.h>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <realtime_tools/realtime_publisher.h>
+#include <hardware_interface/joint_command_interface.h>
 #include <std_msgs/Float64.h>
 #include <std_srvs/Empty.h>
 #include <control_msgs/JointControllerState.h>
@@ -52,7 +53,7 @@
 namespace controller
 {
 class SrController :
-        public controller_interface::Controller<ros_ethercat_model::RobotState>
+        public controller_interface::Controller<hardware_interface::EffortJointInterface>
 {
 public:
   SrController();
