@@ -174,7 +174,7 @@ class ControllerSpawner(object):
             rospy.wait_for_service('controller_manager/switch_controller', self._service_timeout)
             switch_controllers = rospy.ServiceProxy('controller_manager/switch_controller', SwitchController)
             start_success = switch_controllers(controllers_to_start, controllers_to_stop,
-                                               SwitchController._request_class.BEST_EFFORT, False, 0).ok
+                                               SwitchController._request_class.BEST_EFFORT).ok
             if not start_success:
                 rospy.logerr("Failed to stop controllers {} and/or start controllers {}".format(controllers_to_stop,
                                                                                                 controllers_to_start))
